@@ -21,6 +21,11 @@ def home():
     return {"status": "ok"}
 
 
+@app.get("/health")
+def health():
+    return {"status": "ok", "clients": len(clients)}
+
+
 @app.websocket("/ws")
 async def ws(websocket: WebSocket):
     await websocket.accept()
@@ -58,6 +63,24 @@ async def ws(websocket: WebSocket):
                             "type": "refresh_friends"
                         }))
                         print(f"🔄 Friends list refresh sent to {user_id_to_update}")
+
+                # Обновление списка заявок
+                if msg_data.get("type") == "refresh_requests":
+                    user_id_to_update = msg_data.get("target_user_id")
+                    if user_id_to_update in clients:
+                        await clients[user_id_to_update].send_text(json.dumps({
+                            "type": "refresh_requests"
+                        }))
+                        print(f"🔄 Requests list refresh sent to {user_id_to_update}")
+
+                # Новая заявка в друзья
+                if msg_data.get("type") == "new_friend_request":
+                    user_id_to_update = msg_data.get("target_user_id")
+                    if user_id_to_update in clients:
+                        await clients[user_id_to_update].send_text(json.dumps({
+                            "type": "new_friend_request"
+                        }))
+                        print(f"📨 Friend request notification sent to {user_id_to_update}")
 
                 # Друг удалил чат
                 if msg_data.get("type") == "friend_deleted":
