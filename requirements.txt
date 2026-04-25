@@ -1,0 +1,6 @@
+fastapi
+uvicorn
+websockets
+cryptography
+supabase
+python-multipart
